@@ -1,4 +1,4 @@
-# CompositeLamainateTool
+# CompositeLaminateTool
 Composite CLT Analysis Tool
 
 Outline of Tool
