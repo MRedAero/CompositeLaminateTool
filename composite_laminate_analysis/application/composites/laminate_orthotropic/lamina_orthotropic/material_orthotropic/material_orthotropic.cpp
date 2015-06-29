@@ -4,7 +4,7 @@
 
 #include <assert.h>
 #include <math.h>
-#include "MaterialOrthotropic.h"
+#include "material_orthotropic.h"
 
 void MaterialOrthotropic::calculate_elastic_constants(void) {
 

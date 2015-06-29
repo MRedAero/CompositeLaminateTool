@@ -5,7 +5,7 @@
 #ifndef CLT_LAMINAORTHOTROPIC_H
 #define CLT_LAMINAORTHOTROPIC_H
 
-#include "MaterialOrthotropic.h"
+#include "./material_orthotropic/material_orthotropic.h"
 
 
 class LaminaOrthotropic {

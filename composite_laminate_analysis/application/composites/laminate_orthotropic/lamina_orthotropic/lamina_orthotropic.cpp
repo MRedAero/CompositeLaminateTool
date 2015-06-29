@@ -4,7 +4,7 @@
 
 #include <math.h>
 #include <stdio.h>
-#include "LaminaOrthotropic.h"
+#include "lamina_orthotropic.h"
 
 void LaminaOrthotropic::calculate_elastic_constants(void) {
 

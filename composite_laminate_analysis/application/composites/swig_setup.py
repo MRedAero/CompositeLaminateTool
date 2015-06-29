@@ -1,33 +1,38 @@
 import sys
 
 sys.argv.append('build_ext')
-sys.argv.append('--inplace')
+#sys.argv.append('--inplace')
 sys.argv.append('--compiler=mingw32')
 
 from distutils.core import setup, Extension
 
-module1 = Extension('_LaminateOrthotropic',
-                    sources=['LaminateOrthotropic.i',
-                             'LaminateOrthotropic.cpp',
-                             'LaminaOrthotropic.cpp',
-                             'MaterialOrthotropic.cpp',
-                             'matrix_math.cpp'],
+laminate_folder = r'./laminate_orthotropic/'
+lamina_folder = laminate_folder + r'lamina_orthotropic/'
+material_folder = lamina_folder + r'material_orthotropic/'
+
+material = Extension('_material_orthotropic',
+                    sources=[material_folder + 'material_orthotropic.cpp',
+                             material_folder + 'material_orthotropic.i',
+                             './utilities/matrix_math.cpp'],
                     language='c++',
                     swig_opts=['-c++'],)
 
-module2 = Extension('_LaminaOrthotropic',
-                    sources=['LaminaOrthotropic.cpp',
-                             'LaminaOrthotropic.i',
-                             'MaterialOrthotropic.cpp',
-                             'matrix_math.cpp'],
+lamina = Extension('_lamina_orthotropic',
+                    sources=[lamina_folder + 'lamina_orthotropic.cpp',
+                             lamina_folder + 'lamina_orthotropic.i',
+                             material_folder + 'material_orthotropic.cpp',
+                             './utilities/matrix_math.cpp'],
                     language='c++',
                     swig_opts=['-c++'],)
 
-module3 = Extension('_MaterialOrthotropic',
-                    sources=['MaterialOrthotropic.cpp',
-                             'MaterialOrthotropic.i',
-                             'matrix_math.cpp'],
+laminate = Extension('_laminate_orthotropic',
+                    sources=[laminate_folder + 'laminate_orthotropic.i',
+                             laminate_folder + 'laminate_orthotropic.cpp',
+                             lamina_folder + 'lamina_orthotropic.cpp',
+                             material_folder + 'material_orthotropic.cpp',
+                             './utilities/matrix_math.cpp'],
                     language='c++',
                     swig_opts=['-c++'],)
 
-setup(name='LaminateOrthotropic', ext_modules=[module1, module2, module3])
+
+setup(name='laminate_orthotropic', ext_modules=[material, lamina, laminate])

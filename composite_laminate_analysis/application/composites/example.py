@@ -1,8 +1,7 @@
 __author__ = 'Michael Redmond'
 
-from LaminateOrthotropic import LaminateOrthotropic
-from LaminaOrthotropic import LaminaOrthotropic
-from MaterialOrthotropic import MaterialOrthotropic
+from laminate_orthotropic import (LaminateOrthotropic, MaterialOrthotropic)
+from utilities import (create_3d_array, create_2d_array)
 
 material = MaterialOrthotropic()
 material.E11 = 27000000.
@@ -36,11 +35,33 @@ ply.orientation = 90.
 
 laminate.calculate_laminate_properties()
 
-k = 4
-for i in xrange(4):
-    print "%f, %f, %f\n", (laminate.get_unit_strain(4, i, 0)*1000000., laminate.get_unit_strain(4, i, 1)*1000000.,
-                           laminate.get_unit_strain(4, i, 2)*1000000.)
+print laminate.Exx
+print laminate.Eyy
+print laminate.Gxy
+print laminate.nuxy
+print laminate.nuyx
 
-for i in xrange(4):
-    print "%f, %f, %f\n", (laminate.get_unit_stress(4, i, 0), laminate.get_unit_stress(4, i, 1),
-                           laminate.get_unit_stress(4, i, 2))
+if 1:
+
+    k = 4
+    for i in xrange(4):
+        print "%20f %20f %20f" % (laminate.get_unit_strain(i, 4, 0)*1000000., laminate.get_unit_strain(i, 4, 1)*1000000.,
+                               laminate.get_unit_strain(i, 4, 2)*1000000.)
+
+    for i in xrange(4):
+        print "%20f %20f %20f" % (laminate.get_unit_stress(i, 4, 0), laminate.get_unit_stress(i, 4, 1),
+                               laminate.get_unit_stress(i, 4, 2))
+
+loads = create_2d_array(100, 6)
+
+from random import uniform
+
+for i in xrange(100):
+    for j in xrange(6):
+        loads.set_data(i, j, uniform(-100., 100.))
+
+results = laminate.apply_loads(loads)
+
+for i in xrange(results.size_i1):
+    for j in xrange(results.size_i2):
+        print "%20f %20f %20f" % (results.get_data(i, j, 0), results.get_data(i, j, 1), results.get_data(i, j, 2))
