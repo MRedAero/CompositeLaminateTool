@@ -2,15 +2,15 @@
 // Created by Michael on 6/21/2015.
 //
 
-#ifndef CLT_LAMINAORTHOTROPIC_H
-#define CLT_LAMINAORTHOTROPIC_H
+#ifndef CLT_ORTHOTROPICLAMINA_H
+#define CLT_ORTHOTROPICLAMINA_H
 
-#include "./material_orthotropic/material_orthotropic.h"
+#include "../material/orthotropic_material.h"
 
 
-class LaminaOrthotropic {
+class OrthotropicLamina {
 public:
-    MaterialOrthotropic material;
+    OrthotropicMaterial material;
 
     double orientation, thickness;
 
@@ -23,4 +23,4 @@ public:
 };
 
 
-#endif //CLT_LAMINAORTHOTROPIC_H
+#endif //CLT_ORTHOTROPICLAMINA_H

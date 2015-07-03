@@ -44,6 +44,12 @@ T Array2D<T>::get_data(unsigned int i1, unsigned int i2)
 }
 
 template <class T>
+T *Array2D<T>::get_data_ptr(unsigned int i1, unsigned int i2)
+{
+    return &this->data[this->index(i1, i2)];
+}
+
+template <class T>
 void Array2D<T>::set_data(unsigned int i1, unsigned int i2, T value)
 {
     this->data[this->index(i1, i2)] = value;

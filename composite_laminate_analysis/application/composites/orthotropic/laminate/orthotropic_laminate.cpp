@@ -9,10 +9,22 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
-#include "laminate_orthotropic.h"
-#include "../utilities/matrix_math.h"
+#include "orthotropic_laminate.h"
+#include "../../utilities/matrix_math.h"
 
-LaminateOrthotropic::LaminateOrthotropic(void)
+PlyStressStrain::PlyStressStrain(void)
+{
+    this->stress = new BasicArray2D<StressStrain>(1, 1);
+    this->strain = new BasicArray2D<StressStrain>(1, 1);
+}
+
+PlyStressStrain::~PlyStressStrain(void)
+{
+    delete this->stress;
+    delete this->strain;
+}
+
+OrthotropicLaminate::OrthotropicLaminate(void)
 {
     this->ABDmat = new Array2D<double>(6, 6);
     this->ABDinv = new Array2D<double>(6, 6);
@@ -20,7 +32,7 @@ LaminateOrthotropic::LaminateOrthotropic(void)
     this->local_ply_stress = new Array3D<double>(1, 6, 3);
 }
 
-LaminateOrthotropic::~LaminateOrthotropic(void)
+OrthotropicLaminate::~OrthotropicLaminate(void)
 {
     delete this->ABDmat;
     delete this->ABDinv;
@@ -28,7 +40,7 @@ LaminateOrthotropic::~LaminateOrthotropic(void)
     delete this->local_ply_stress;
 }
 
-void LaminateOrthotropic::calculate_laminate_properties(void) {
+void OrthotropicLaminate::calculate_laminate_properties(void) {
 
     unsigned int i;
 
@@ -43,7 +55,7 @@ void LaminateOrthotropic::calculate_laminate_properties(void) {
     for(i = 0; i < this->stackup.size(); i++)
     {
 
-        LaminaOrthotropic *lamina = &this->stackup[i];
+        OrthotropicLamina *lamina = &this->stackup[i];
         lamina->calculate_elastic_constants();
 
         assert(lamina->thickness > 0.);
@@ -143,7 +155,7 @@ void LaminateOrthotropic::calculate_laminate_properties(void) {
 
 }
 
-void LaminateOrthotropic::calculate_unit_stress(void)
+void OrthotropicLaminate::calculate_unit_stress(void)
 {
 
     double *unit_loads = NULL;
@@ -191,7 +203,7 @@ void LaminateOrthotropic::calculate_unit_stress(void)
             double e22 = n2*global_ply_strain[0] + m2*global_ply_strain[1] - m*n*global_ply_strain[2];
             double e12 = -2.*mn*global_ply_strain[0] + 2.*mn*global_ply_strain[1] + (m2 - n2)*global_ply_strain[2];
 
-            MaterialOrthotropic *material = &this->stackup[j].material;
+            OrthotropicMaterial *material = &this->stackup[j].material;
 
             // local ply stress
             double f11 = e11*material->C11 + e22*material->C12;
@@ -218,29 +230,29 @@ void LaminateOrthotropic::calculate_unit_stress(void)
 
 }
 
-void LaminateOrthotropic::set_number_of_plies(unsigned int size)
+void OrthotropicLaminate::set_number_of_plies(unsigned int size)
 {
     this->stackup.resize(size);
 }
 
-LaminaOrthotropic *LaminateOrthotropic::get_ply(unsigned int i)
+OrthotropicLamina *OrthotropicLaminate::get_ply(unsigned int i)
 {
     return &this->stackup[i];
 }
 
-double LaminateOrthotropic::get_unit_strain(unsigned int ply, unsigned int load, unsigned int component)
+double OrthotropicLaminate::get_unit_strain(unsigned int ply, unsigned int load, unsigned int component)
 {
     return this->local_ply_strain->get_data(ply, load, component);
 }
 
-double LaminateOrthotropic::get_unit_stress(unsigned int ply, unsigned int load, unsigned int component)
+double OrthotropicLaminate::get_unit_stress(unsigned int ply, unsigned int load, unsigned int component)
 {
     return this->local_ply_stress->get_data(ply, load, component);
 }
 
-Array3D<double> *LaminateOrthotropic::apply_loads(Array2D<double> *loads)
+PlyStressStrain *OrthotropicLaminate::apply_loads(Array2D<double> *loads)
 {
-    MaterialOrthotropic *material;
+    OrthotropicMaterial *material;
 
     //assert (this->local_ply_strain != NULL);
     //assert (this->local_ply_stress != NULL);
@@ -250,41 +262,50 @@ Array3D<double> *LaminateOrthotropic::apply_loads(Array2D<double> *loads)
 
     // i = load #, j = ply #, k = component
     // 0-2 = stress, 3 - 5 = strain, 6 - 10 = stress allowable, 11 - 15 = strain allowable
-    Array3D<double> *results = new Array3D<double>(num_loads, this->stackup.size(), 16);
+    PlyStressStrain *results = new PlyStressStrain();
+    results->stress->init(num_loads, this->stackup.size());
+    results->strain->init(num_loads, this->stackup.size());
 
     unsigned int i, j, k;
+
+    StressStrain2D *stress_ = results->stress;
+    StressStrain2D *strain_ = results->strain;
 
     for(i = 0; i < num_loads; i++)
     {
         for(j = 0; j < this->stackup.size(); j++)
         {
+
+            StressStrain *stress = stress_->get_data_ptr(i, j);
+            StressStrain *strain = strain_->get_data_ptr(i, j);
+
             for(k = 0; k < 6; k++)
             {
 
                 double load = loads->get_data(i, k);
 
-                results->increment_data(i, j, 0, load*this->local_ply_stress->get_data(j, k, 0));
-                results->increment_data(i, j, 1, load*this->local_ply_stress->get_data(j, k, 1));
-                results->increment_data(i, j, 2, load*this->local_ply_stress->get_data(j, k, 2));
+                stress->a11 += load*this->local_ply_stress->get_data(j, k, 0);
+                stress->a22 += load*this->local_ply_stress->get_data(j, k, 1);
+                stress->a12 += load*this->local_ply_stress->get_data(j, k, 2);
 
-                results->increment_data(i, j, 3, load*this->local_ply_strain->get_data(j, k, 0));
-                results->increment_data(i, j, 4, load*this->local_ply_strain->get_data(j, k, 1));
-                results->increment_data(i, j, 5, load*this->local_ply_strain->get_data(j, k, 2));
+                strain->a11 += load*this->local_ply_strain->get_data(j, k, 0);
+                strain->a22 += load*this->local_ply_strain->get_data(j, k, 1);
+                strain->a12 += load*this->local_ply_strain->get_data(j, k, 2);
             }
 
             material = &this->stackup[j].material;
 
-            results->set_data(i, j, 6, material->F1t);
-            results->set_data(i, j, 7, material->F1c);
-            results->set_data(i, j, 8, material->F2t);
-            results->set_data(i, j, 9, material->F2c);
-            results->set_data(i, j, 10, material->F12);
+            stress->A1t = abs(material->F1t);
+            stress->A1c = abs(material->F1c);
+            stress->A2t = abs(material->F2t);
+            stress->A2c = abs(material->F2c);
+            stress->A12 = abs(material->F12);
 
-            results->set_data(i, j, 11, material->E1t);
-            results->set_data(i, j, 12, material->E1c);
-            results->set_data(i, j, 13, material->E2t);
-            results->set_data(i, j, 14, material->E2c);
-            results->set_data(i, j, 15, material->E12);
+            strain->A1t = abs(material->E1t);
+            strain->A1c = abs(material->E1c);
+            strain->A2t = abs(material->E2t);
+            strain->A2c = abs(material->E2c);
+            strain->A12 = abs(material->E12);
 
         }
     }

@@ -2,15 +2,15 @@
 // Created by Michael on 6/21/2015.
 //
 
-#ifndef CLT_MATERIALORTHOTROPIC_H
-#define CLT_MATERIALORTHOTROPIC_H
+#ifndef CLT_ORTHOTROPICMATERIAL_H
+#define CLT_ORTHOTROPICMATERIAL_H
 
 #include <string>
 
 using namespace std;
 
 
-class MaterialOrthotropic {
+class OrthotropicMaterial {
 public:
     // descriptors
     string material_name;
@@ -38,4 +38,4 @@ public:
 };
 
 
-#endif //CLT_MATERIALORTHOTROPIC_H
+#endif //CLT_ORTHOTROPICMATERIAL_H

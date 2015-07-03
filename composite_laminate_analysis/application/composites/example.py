@@ -1,15 +1,25 @@
 __author__ = 'Michael Redmond'
 
-from laminate_orthotropic import (LaminateOrthotropic, MaterialOrthotropic)
-from utilities import (create_3d_array, create_2d_array)
+from orthotropic import (OrthotropicLaminate, OrthotropicMaterial, tsai_wu_analysis)
+from utilities import create_2d_array
 
-material = MaterialOrthotropic()
+material = OrthotropicMaterial()
 material.E11 = 27000000.
 material.E22 = 1500000.
 material.nu12 = 0.35
 material.G12 = 1100000.
+material.F1t = 108000.
+material.F1c = -108000.
+material.F2t = 9000.
+material.F2c = -10500.
+material.F12 = 11000.
+material.E1t = .004
+material.E1c = -.004
+material.E2t = .006
+material.E2c = -.007
+material.E12 = .01
 
-laminate = LaminateOrthotropic()
+laminate = OrthotropicLaminate()
 
 laminate.set_number_of_plies(4)
 
@@ -41,27 +51,23 @@ print laminate.Gxy
 print laminate.nuxy
 print laminate.nuyx
 
-if 1:
-
-    k = 4
-    for i in xrange(4):
-        print "%20f %20f %20f" % (laminate.get_unit_strain(i, 4, 0)*1000000., laminate.get_unit_strain(i, 4, 1)*1000000.,
-                               laminate.get_unit_strain(i, 4, 2)*1000000.)
-
-    for i in xrange(4):
-        print "%20f %20f %20f" % (laminate.get_unit_stress(i, 4, 0), laminate.get_unit_stress(i, 4, 1),
-                               laminate.get_unit_stress(i, 4, 2))
-
-loads = create_2d_array(100, 6)
+loads = create_2d_array(10, 6)
 
 from random import uniform
 
-for i in xrange(100):
+for i in xrange(10):
     for j in xrange(6):
-        loads.set_data(i, j, uniform(-100., 100.))
+        load = uniform(-1., 1.)
+        loads.set_data(i, j, load)
 
-results = laminate.apply_loads(loads)
+ply_loads = laminate.apply_loads(loads)
 
-for i in xrange(results.size_i1):
-    for j in xrange(results.size_i2):
-        print "%20f %20f %20f" % (results.get_data(i, j, 0), results.get_data(i, j, 1), results.get_data(i, j, 2))
+ply_stress = ply_loads.stress
+
+results = tsai_wu_analysis(ply_stress)
+
+# print strength ratios
+for i in xrange(results.rows):
+    for j in xrange(results.cols):
+        print results.get_data(i, j)
+

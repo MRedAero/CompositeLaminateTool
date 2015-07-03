@@ -8,9 +8,7 @@ from distutils.core import setup, Extension
 
 laminate = Extension('_create_arrays',
                     sources=['create_arrays.i',
-                             'create_arrays.cpp',
-                             'array_2d.cpp',
-                             'array_3d.cpp'],
+                             'create_arrays.cpp'],
                     language='c++',
                     swig_opts=['-c++'],)
 

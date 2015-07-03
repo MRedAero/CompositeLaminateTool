@@ -6,12 +6,12 @@ sys.argv.append('--compiler=mingw32')
 
 from distutils.core import setup, Extension
 
-lamina = Extension('_lamina_orthotropic',
-                   sources=['lamina_orthotropic.cpp',
-                            'lamina_orthotropic.i',
-                            './material_orthotropic/material_orthotropic.cpp',
+lamina = Extension('_orthotropic_lamina',
+                   sources=['orthotropic_lamina.cpp',
+                            'orthotropic_lamina.i',
+                            '../material/orthotropic_material.cpp',
                             '../../utilities/matrix_math.cpp'],
                    language='c++',
                    swig_opts=['-c++'],)
 
-setup(name='lamina_orthotropic', ext_modules=[lamina])
+setup(name='orthotropic_lamina', ext_modules=[lamina])

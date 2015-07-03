@@ -7,8 +7,7 @@ sys.argv.append('--compiler=mingw32')
 from distutils.core import setup, Extension
 
 laminate = Extension('_array_3d',
-                    sources=['array_3d.i',
-                             'array_3d.cpp'],
+                    sources=['array_3d.i'],
                     language='c++',
                     swig_opts=['-c++'],)
 

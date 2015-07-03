@@ -4,9 +4,9 @@
 
 #include <assert.h>
 #include <math.h>
-#include "material_orthotropic.h"
+#include "orthotropic_material.h"
 
-void MaterialOrthotropic::calculate_elastic_constants(void) {
+void OrthotropicMaterial::calculate_elastic_constants(void) {
 
     assert(this->E11 > 0.);
     assert(this->E22 > 0.);

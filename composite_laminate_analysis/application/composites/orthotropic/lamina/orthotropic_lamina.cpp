@@ -4,9 +4,9 @@
 
 #include <math.h>
 #include <stdio.h>
-#include "lamina_orthotropic.h"
+#include "orthotropic_lamina.h"
 
-void LaminaOrthotropic::calculate_elastic_constants(void) {
+void OrthotropicLamina::calculate_elastic_constants(void) {
 
     this->material.calculate_elastic_constants();
 
